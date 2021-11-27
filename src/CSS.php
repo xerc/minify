@@ -481,6 +481,86 @@ class CSS extends Minify
     }
 
     /**
+     * Shorthand HEX color codes.
+     * #FF0000 -> #f00 -> red
+     *
+     * @param string $content The CSS content to shorten the HEX color codes for
+     *
+     * @return string
+     */
+    protected function shortenHexColors($content)
+    {
+        // shorten repeating patterns within HEX ..
+        $content = preg_replace('/(?<=[: (])#([0-9a-f])\\1([0-9a-f])\\2([0-9a-f])\\3(?:([0-9a-f])\\4)?(?=[ ;)}])/i', '#$1$2$3$4', $content);
+
+        // remove alpha channel if it's pointless ..
+        $content = preg_replace('/(?<=[: (])#([0-9a-f]{6})ff(?=[ ;)}])/i','#$1', $content);
+        $content = preg_replace('/(?<=[: (])#([0-9a-f]{3})f(?=[ ;)}])/i', '#$1', $content);
+
+        $colors = array(
+            // make these more readable
+            '#00f'    => 'blue',
+            '#dc143c' => 'crimson',
+            '#0ff'    => 'cyan',
+            '#8b0000' => 'darkred',
+            '#696969' => 'dimgray',
+            '#ff69b4' => 'hotpink',
+            '#0f0'    => 'lime',
+            '#fdf5e6' => 'oldlace',
+            '#87ceeb' => 'skyblue',
+            '#d8bfd8' => 'thistle',
+            // we can shorten some even more by replacing them with their color name
+            '#f0ffff' => 'azure',
+            '#f5f5dc' => 'beige',
+            '#ffe4c4' => 'bisque',
+            '#a52a2a' => 'brown',
+            '#ff7f50' => 'coral',
+            '#ffd700' => 'gold',
+            '#808080' => 'gray',
+            '#008000' => 'green',
+            '#4b0082' => 'indigo',
+            '#fffff0' => 'ivory',
+            '#f0e68c' => 'khaki',
+            '#faf0e6' => 'linen',
+            '#800000' => 'maroon',
+            '#000080' => 'navy',
+            '#808000' => 'olive',
+            '#ffa500' => 'orange',
+            '#da70d6' => 'orchid',
+            '#cd853f' => 'peru',
+            '#ffc0cb' => 'pink',
+            '#dda0dd' => 'plum',
+            '#800080' => 'purple',
+            '#f00'    => 'red',
+            '#fa8072' => 'salmon',
+            '#a0522d' => 'sienna',
+            '#c0c0c0' => 'silver',
+            '#fffafa' => 'snow',
+            '#d2b48c' => 'tan',
+            '#008080' => 'teal',
+            '#ff6347' => 'tomato',
+            '#ee82ee' => 'violet',
+            '#f5deb3' => 'wheat',
+            // or the other way around
+            'black'   => '#000',
+            'fuchsia' => '#f0f',
+            'magenta' => '#f0f',
+            'white'   => '#fff',
+            'yellow'  => '#ff0',
+            // and also `transparent`
+            'transparent' => '#fff0'
+        );
+
+        return preg_replace_callback(
+            '/(?<=[: (])('.implode('|', array_keys($colors)).')(?=[ ;)}])/i',
+            function ($match) use ($colors) {
+                return $colors[strtolower($match[0])];
+            },
+            $content
+        );
+    }
+
+    /**
      * Shorthand RGB color codes.
      * rgb(255,0,0) -> #f00.
      *
@@ -490,107 +570,20 @@ class CSS extends Minify
      */
     protected function shortenRGBColors($content)
     {
+        /*
+          https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/rgb()
+        */
         // THX @ https://www.regular-expressions.info/numericranges.html
         $dec = '([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])';// [000-255]
 
         // remove alpha channel if it's pointless ..
-        $content = preg_replace("/rgba?\($dec[,\s]$dec[,\s]$dec[,\/]1(?:[\.\d]*|00%)?\)/i", 'rgb($1,$2,$3)', $content);
-
-        // replace `transparent` with shortcut ..
-        $content = preg_replace("/rgba?\($dec[,\s]$dec[,\s]$dec[,\/]0(?:[\.0%]*)?\)/i", '#0000', $content);
+        $content = preg_replace('/(rgb)a?\(([^,\s]+)[,\s]([^,\s]+)[,\s]([^,\s]+)\s?[,\/]\s?1(?:[0-9\.]*|00%)?\)/i', '$1($2 $3 $4)', $content);
 
         return preg_replace_callback(
-            "/rgb\($dec,$dec,$dec\)/i",
+            "/rgb\($dec[,\s]$dec[,\s]$dec\)/i",
             function ($match)
             {
                 return sprintf('#%02x%02x%02x', $match[1],$match[2],$match[3]);
-            },
-            $content
-        );
-    }
-
-    /**
-     * Shorthand HEX color codes.
-     * #FF0000 -> #f00.
-     *
-     * @param string $content The CSS content to shorten the HEX color codes for
-     *
-     * @return string
-     */
-    protected function shortenHexColors($content)
-    {
-        // shorten repeating patterns within HEX ..
-        $content = preg_replace('/(?<=[: ])#([0-9a-f])\\1([0-9a-f])\\2([0-9a-f])\\3(?:([0-9a-f])\\4)?(?=[; }])/i', '#$1$2$3$4', $content);
-
-        // remove alpha channel if it's pointless ..
-        $content = preg_replace('/(?<=[: ])#([0-9a-f]{6})ff?(?=[; }])/i', '#$1', $content);
-        $content = preg_replace('/(?<=[: ])#([0-9a-f]{3})f?(?=[; }])/i', '#$1', $content);
-
-        // replace `transparent` with shortcut ..
-        $content = preg_replace('/(?<=[: ])#([0-9a-f]{6})00?(?=[; }])/i', '#0000', $content);
-
-        $colors = array(
-            // make these more readable
-            '#DC143C' => 'crimson',
-            '#8B0000' => 'darkred',
-            '#696969' => 'dimgray',
-            '#FF69B4' => 'hotpink',
-            '#FDF5E6' => 'oldlace',
-            '#87CEEB' => 'skyblue',
-            '#D8BFD8' => 'thistle',
-            // we can shorten some even more by replacing them with their color name
-            '#F0FFFF' => 'azure',
-            '#F5F5DC' => 'beige',
-            '#FFE4C4' => 'bisque',
-            '#0000FF' => 'blue',
-            '#00F'    => 'blue',
-            '#A52A2A' => 'brown',
-            '#FF7F50' => 'coral',
-            '#00FFFF' => 'cyan',
-            '#0FF'    => 'cyan',
-            '#FFD700' => 'gold',
-            '#808080' => 'gray',
-            '#008000' => 'green',
-            '#4B0082' => 'indigo',
-            '#FFFFF0' => 'ivory',
-            '#F0E68C' => 'khaki',
-            '#00FF00' => 'lime',
-            '#0F0'    => 'lime',
-            '#FAF0E6' => 'linen',
-            '#800000' => 'maroon',
-            '#000080' => 'navy',
-            '#808000' => 'olive',
-            '#FFA500' => 'orange',
-            '#DA70D6' => 'orchid',
-            '#CD853F' => 'peru',
-            '#FFC0CB' => 'pink',
-            '#DDA0DD' => 'plum',
-            '#800080' => 'purple',
-            '#FF0000' => 'red',
-            '#F00'    => 'red',
-            '#FA8072' => 'salmon',
-            '#A0522D' => 'sienna',
-            '#C0C0C0' => 'silver',
-            '#FFFAFA' => 'snow',
-            '#D2B48C' => 'tan',
-            '#008080' => 'teal',
-            '#FF6347' => 'tomato',
-            '#EE82EE' => 'violet',
-            '#F5DEB3' => 'wheat',
-            // or the other way around
-            'BLACK'   => '#000',
-            'FUCHSIA' => '#f0f',
-            'MAGENTA' => '#f0f',
-            'WHITE'   => '#fff',
-            'YELLOW'  => '#ff0',
-            // and also `transparent`
-            'TRANSPARENT' => '#0000'
-        );
-
-        return preg_replace_callback(
-            '/(?<=[: ])('.implode('|', array_keys($colors)).')(?=[; }])/i',
-            function ($match) use ($colors) {
-                return $colors[strtoupper($match[0])];
             },
             $content
         );
