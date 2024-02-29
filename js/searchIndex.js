@@ -1,6 +1,26 @@
 Search.appendIndex(
     [
                 {
+            "fqsen": "\\MatthiasMullie\\Minify\\CSS",
+            "name": "CSS",
+            "summary": "CSS\u0020minifier.",
+            "url": "classes/MatthiasMullie-Minify-CSS.html"
+        },                {
+            "fqsen": "\\MatthiasMullie\\Minify\\CSS\u003A\u003AsetMaxImportSize\u0028\u0029",
+            "name": "setMaxImportSize",
+            "summary": "Set\u0020the\u0020maximum\u0020size\u0020if\u0020files\u0020to\u0020be\u0020imported.",
+            "url": "classes/MatthiasMullie-Minify-CSS.html#method_setMaxImportSize"
+        },                {
+            "fqsen": "\\MatthiasMullie\\Minify\\CSS\u003A\u003AsetImportExtensions\u0028\u0029",
+            "name": "setImportExtensions",
+            "summary": "Set\u0020the\u0020type\u0020of\u0020extensions\u0020to\u0020be\u0020imported\u0020into\u0020the\u0020CSS\u0020\u0028to\u0020save\u0020network\nconnections\u0029.",
+            "url": "classes/MatthiasMullie-Minify-CSS.html#method_setImportExtensions"
+        },                {
+            "fqsen": "\\MatthiasMullie\\Minify\\CSS\u003A\u003Aexecute\u0028\u0029",
+            "name": "execute",
+            "summary": "Minify\u0020the\u0020data.",
+            "url": "classes/MatthiasMullie-Minify-CSS.html#method_execute"
+        },                {
             "fqsen": "\\MatthiasMullie\\Minify\\Exception",
             "name": "Exception",
             "summary": "Base\u0020Exception\u0020Class.",
